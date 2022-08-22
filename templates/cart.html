@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      type="application/atom+xml"
+      href="/feed.xml"
+      rel="alternate"
+      title="Grumpy Website"
+    />
+    <link
+      href="/static/favicons/apple-touch-icon-152x152.png"
+      rel="apple-touch-icon-precomposed"
+      sizes="152x152"
+    />
+    <link
+      href="/static/favicons/favicon-196x196.png"
+      rel="icon"
+      sizes="196x196"
+    />
+    <link href="/static/favicons/favicon-32x32.png" rel="icon" sizes="32x32" />
+    <link
+      rel="preload"
+      href="/static/favicons/apple-touch-icon-152x152.png"
+      as="image"
+    />
+    <title>Grumpy Website</title>
+    <style type="text/css">
+      * {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --body-bg: #fff;
+      }
+
+      body {
+        background-color: var(--body-bg);
+        font-family: sans-serif;
+        line-height: 140%;
+        padding: 0.25em 1em;
+        max-width: 652px; /* .post_img =>> 550px */
+        margin: 0 auto;
+        transition: transform 500ms ease-in-out;
+      }
+
+      .icon_rotate {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        background: url("/static/rotate.svg");
+        margin: 5px 5px -5px -25px;
+      }
+      @media (max-width: 679px) {
+        .icon_rotate {
+          display: none;
+        }
+      }
+
+      /* HEADER */
+
+      header {
+        margin-bottom: 2em;
+      }
+
+      .title {
+        margin-bottom: 0;
+      }
+      .title_back {
+        position: absolute;
+        margin-left: -1em;
+        text-decoration: none;
+      }
+      .title_back:hover {
+        text-decoration: underline;
+      }
+
+      .title_new {
+        padding: 10px;
+        margin: -10px 0 0 0;
+        float: right;
+        text-decoration: none;
+        color: #c3c;
+      }
+      .title_new:hover {
+        color: #d4d;
+      }
+      body.anonymous .title_new {
+        display: none;
+      }
+
+      .subtitle {
+        margin-left: 0.09em;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      .subtitle > span {
+        cursor: pointer;
+      }
+
+      /* POST */
+
+      .post {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 2em;
+      }
+      .post_side {
+        margin-right: 20px;
+        min-width: 50px;
+      }
+      @media (max-width: 399px) {
+        .post_side {
+          display: none;
+        }
+      }
+      .post_avatar {
+        width: 50px;
+        height: 50px;
+      }
+
+      .post_video_outer {
+        position: relative;
+        max-width: max-content;
+      }
+      .post_img,
+      .post_video {
+        display: block;
+        position: relative;
+      }
+      .post_img,
+      .post_video_outer {
+        margin-bottom: 1em;
+      }
+      .post_img-fix {
+        display: block;
+        background-size: 100%;
+      }
+      .post_img-fix > img {
+        position: absolute;
+        height: 100%;
+      }
+      .post_video,
+      .post_img-flex > img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        max-height: 500px;
+      }
+      .post_author {
+        font-weight: bold;
+      }
+      .post_content {
+        width: 100%;
+      }
+      .post_body > p {
+        margin: 0 0 1em 0;
+      }
+
+      .post_meta_edit {
+        float: right;
+        color: #c3c;
+      }
+      .post_meta_edit:hover {
+        color: #d4d;
+      }
+      body.anonymous .post_meta_edit {
+        display: none;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        background-color: #eee;
+      }
+      .controls > button {
+        width: 24px;
+        height: 24px;
+        background-image: url(/static/controls.svg);
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+      }
+      button.paused:hover {
+        background-position: -100% 0;
+      }
+      button.playing {
+        background-position: 0 -100%;
+      }
+      button.playing:hover {
+        background-position: -100% -100%;
+      }
+      button.fullscreen {
+        background-position: 0 -200%;
+      }
+      button.fullscreen:hover {
+        background-position: -100% -200%;
+      }
+
+      /* FOOTER */
+      @keyframes rotating {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loader-block {
+        margin: 0 0 3em 0;
+        text-align: center;
+      }
+      .loader {
+        width: 76px;
+        height: 76px;
+        border: 2px solid #000;
+        border-radius: 50%;
+        background-image: url("/static/favicons/apple-touch-icon-152x152.png");
+        background-size: 100%;
+      }
+      .loader.loading {
+        animation: rotating 1s ease-in-out infinite;
+      }
+      .loader.error {
+        cursor: pointer;
+        border-color: red;
+      }
+      .loader.error:hover {
+        position: relative;
+        top: -1px;
+      }
+      .loader.small {
+        width: 38px;
+        height: 38px;
+        border-width: 1.5px;
+      }
+
+      footer {
+        padding: 1em 0 1em;
+        margin-top: 2em;
+        border-top: 1px solid currentColor;
+      }
+
+      /* CSS Framework */
+
+      .relative {
+        position: relative;
+      }
+
+      .row {
+        display: flex;
+      }
+      .row > * {
+        margin-right: 20px;
+      }
+      .row > *:last-child {
+        margin-right: 0;
+      }
+      .row.left {
+        justify-content: flex-start;
+      }
+      .row.center {
+        justify-content: center;
+      }
+      .row.right {
+        justify-content: flex-end;
+      }
+      .row.top {
+        align-items: flex-start;
+      }
+      .row.middle {
+        align-items: center;
+      }
+      .row.bottom {
+        align-items: flex-end;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+      }
+      .column > * {
+        margin-bottom: 20px;
+      }
+      .column > *:last-child {
+        margin-bottom: 0;
+      }
+      .column.top {
+        justify-content: flex-start;
+      }
+      .column.middle {
+        justify-content: center;
+      }
+      .column.bottom {
+        justify-content: flex-end;
+      }
+      .column.left {
+        align-items: flex-start;
+      }
+      .column.center {
+        align-items: center;
+      }
+      .column.right {
+        align-items: flex-end;
+      }
+
+      .grow {
+        flex: 1;
+      }
+      .space-between {
+        justify-content: space-between;
+      }
+      button,
+      .no-select {
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .cursor-pointer {
+        cursor: pointer;
+      }
+      .cursor-default {
+        cursor: default;
+      }
+
+      .no-display {
+        display: none;
+      }
+
+      .stick-left {
+        position: absolute;
+        left: 0;
+      }
+      .stick-right {
+        position: absolute;
+        right: 0;
+      }
+      .stick-top {
+        position: absolute;
+        top: 0;
+      }
+      .stick-bottom {
+        position: absolute;
+        bottom: 0;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --body-bg: #2b2c2d;
+        }
+
+        body {
+          color: #fff;
+        }
+        a {
+          color: #8fc4ec;
+        }
+        a:visited {
+          color: #bc84bc;
+        }
+        .title_new,
+        .post_meta_edit {
+          color: #e9e;
+        }
+        .icon_rotate {
+          background-image: url("/static/rotate_dark.svg");
+        }
+      }
+    </style>
+    <script>
+      var subtitles = [
+          "Do you want to cancel? – YES / CANCEL",
+          "Select purchase to purchase for $0.00 – PURCHASE / CANCEL",
+          "This isn not text, this is a link. No not press.",
+          "Do not refresh this page, do not click Back",
+          "Error occured — OK",
+          "Password must be 8 characters including 1 uppercase letter and 1 number",
+          "Are you sure you want to exist? — YES / NO",
+          "Open in app",
+          "Warning: No pixels were selected",
+          "You need to be logged in to log out. Please log in to log out.",
+          // 'Cancel changes? – CANCEL / CHANGE',
+          "Cancel subscription? – YES / CANCEL",
+          "Please, try again later",
+          "You need to login to unsubscribe",
+          "Update Java Runtime?",
+          "Your PC will automatically restart in one minute",
+          "grumpy.website wants to: Show notifications",
+          "You are using an outdated browser",
+          "How likely are you to recommend grumpy.website to your friends?",
+          "The system has recovered from a serious error",
+          "Are you in Boston? — YES / SELECT ANOTHER",
+          "Hi Carol, thanks for signing up! My name is Kevin...",
+          "We use cookies on this website to make your browsing experience better",
+          "By using the site you agree to our use of cookies",
+          "[ ] Don't show this again",
+          "This page requires you to use a recent browser (Internet Explorer 5+ or Netscape Navigator 7.0)",
+          "Like failed",
+          "Add to Home Screen",
+          "In high demand—6 other people are looking at this page",
+          "You’ve read 9 stories this month. Let’s make things official",
+          "Medium follows Do Not Track but we track to personalize your experience and send data to select third-parties to make our features work",
+          "Plugin is ready to update",
+          "Part 2 of 3: Installing features and drivers. 50% complete",
+          "Don’t turn off your computer, this will take a while",
+          "Данный ресурс заблокирован! по решению Роскомнадзора",
+          "Already a member? Sign in.",
+          "Trust this computer?",
+          "Why am I seeing this?",
+          "Drop images here to send them in a quick way",
+          "Choose an account to continue",
+          "The operation can’t be completed because it isn’t supported",
+          "Are you sure you want to close all programs and shut down the computer?",
+          "Please take a moment to rate your experience",
+          "Would you like to save this file?",
+          ",   ?",
+          "This app is using significant energy",
+          "The disk was not ejected properly",
+          "Trying to regain internet connection... Hide this message.",
+          "Loading...",
+          "Remind me tomorrow",
+          "Stop showing me this",
+          "See fewer posts like this",
+          "This content is not available in your country",
+          "This website wants to know your location",
+          "We’re sorry! You need to update your Flash Player.",
+          "You have one unread message",
+          "We are updating our privacy policy",
+          "To read the rest of the story, please buy a subscription",
+          "If your download does not start automatically, use the following link",
+        ],
+        subtitle_el,
+        subtitle_idx = subtitles.length;
+
+      function shuffle(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = array[i];
+          array[i] = array[j];
+          array[j] = temp;
+        }
+      }
+
+      function reload_subtitle() {
+        ++subtitle_idx;
+        if (subtitle_idx >= subtitles.length) {
+          shuffle(subtitles);
+          subtitle_idx = 0;
+        }
+        subtitle_el.innerHTML = subtitles[subtitle_idx];
+      }
+
+      window.addEventListener("DOMContentLoaded", function () {
+        subtitle_el = document.querySelector(".subtitle-text");
+        if (subtitle_el) {
+          subtitle_el.onclick = reload_subtitle;
+          reload_subtitle();
+          if (document.cookie.indexOf("grumpy_user=") >= 0) {
+            document.body.classList.remove("anonymous");
+          }
+        }
+      });
+
+      var rotate_angle_deg = 0;
+
+      function body_rotate() {
+        rotate_angle_deg += 180;
+        document.body.style.transform = "rotate(" + rotate_angle_deg + "deg)";
+      }
+
+      function toggle_video(wrapper, play) {
+        var video = wrapper.querySelector("video");
+        var button = wrapper.querySelector(".paused");
+        if (play) {
+          button.classList.add("playing");
+        } else if (video.paused) {
+          video.play();
+          button.classList.add("playing");
+        } else {
+          video.pause();
+          button.classList.remove("playing");
+        }
+      }
+
+      function toggle_video_fullscreen(wrapper) {
+        var video = wrapper.querySelector("video");
+        if (video.requestFullscreen) video.requestFullscreen();
+        else if (video.mozRequestFullScreen) video.mozRequestFullScreen();
+        else if (video.webkitRequestFullScreen) video.webkitRequestFullScreen();
+        else if (video.msRequestFullscreen) video.msRequestFullscreen();
+        else console.log("Fullscreen is not supported", video);
+      }
+    </script>
+    <script>
+      var loader_status = "IDLE",
+        loader;
+
+      function load_posts() {
+        loader_status = "LOADING";
+        loader.classList.add("loading");
+        loader.classList.remove("error");
+        loader.removeEventListener("click", load_posts);
+        var posts = document.querySelectorAll(".post"),
+          last_post = posts[posts.length - 1],
+          last_post_id = last_post.getAttribute("data-id");
+
+        var req = new XMLHttpRequest();
+
+        req.addEventListener("load", function () {
+          loader.classList.remove("loading");
+          var resp = this;
+          if (resp.status !== 200) {
+            loader_status = "ERROR";
+            loader.classList.add("error");
+            loader.addEventListener("click", load_posts);
+          } else if (resp.responseText.length === 0) {
+            loader_status = "DONE";
+            loader.remove();
+          } else {
+            var div = document.createElement("div");
+            div.innerHTML = resp.responseText;
+            var loaderBlock = loader.parentNode;
+            loaderBlock.parentNode.insertBefore(div, loaderBlock);
+            loader_status = "IDLE";
+          }
+        });
+
+        req.open("GET", "/after/" + last_post_id);
+        req.send();
+      }
+
+      function on_scroll(e) {
+        var cont = document.body,
+          full_height = cont.scrollHeight,
+          viewport_height = window.innerHeight,
+          scrolled =
+            window.pageYOffset ||
+            document.documentElement.scrollTop ||
+            document.body.scrollTop,
+          scrolled_bottom = scrolled + viewport_height,
+          at_bottom = scrolled_bottom >= full_height - 200;
+
+        if (at_bottom && loader_status === "IDLE") load_posts();
+      }
+
+      window.addEventListener("DOMContentLoaded", function () {
+        loader = document.querySelector(".loader");
+        on_scroll();
+        window.addEventListener("scroll", on_scroll);
+      });
+    </script>
+  </head>
+  <body class="anonymous">
+    <header>
+      <h1 class="title">
+        Grumpy Website<a href="/new" class="title_new">+</a>
+      </h1>
+      <p class="subtitle">
+        <span onclick="body_rotate()" class="icon_rotate"></span
+        ><span class="subtitle-text"> </span>
+      </p>
+    </header>
+    <div data-id="0Y-qEiQZ4" class="post">
+      <div class="post_side">
+        <img src="/static/nikitonsky.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div class="post_video_outer">
+          <video
+            autoplay=""
+            muted=""
+            loop=""
+            preload="auto"
+            playsinline=""
+            onplay="toggle_video(this.parentNode, true);"
+            class="post_video"
+          >
+            <source type="video/mp4" src="/post/0Y-qEiQZ4/NA4ER2o.fit.mp4" />
+          </video>
+          <div class="controls">
+            <button
+              onclick="toggle_video(this.parentNode.parentNode);"
+              class="paused"
+            ></button
+            ><button
+              onclick="toggle_video_fullscreen(this.parentNode.parentNode);"
+              class="fullscreen"
+            ></button>
+          </div>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">nikitonsky: </span>Don’t make users move
+            their mouse so far for no reason. Especially in a scenario that’s so
+            easy to predict
+          </p>
+        </div>
+        <p class="post_meta">
+          August 22, 2022 // <a href="/post/0Y-qEiQZ4">Hyperlink</a
+          ><a href="/post/0Y-qEiQZ4/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div data-id="0Y-9uzVim" class="post">
+      <div class="post_side">
+        <img src="/static/nikitonsky.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div style="max-width: 550px">
+          <a
+            href="/post/0Y-9uzVim/N9ueYGK.orig.png"
+            target="_blank"
+            style="padding-bottom: 76.0909090909091%"
+            class="post_img post_img-fix"
+            ><img src="/post/0Y-9uzVim/N9ueYGK.fit.jpeg"
+          /></a>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">nikitonsky: </span>Which window is active?
+            Yep – the one on the right. You can tell by red traffic light
+          </p>
+        </div>
+        <p class="post_meta">
+          August 20, 2022 // <a href="/post/0Y-9uzVim">Hyperlink</a
+          ><a href="/post/0Y-9uzVim/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div data-id="0Xzx_MvPr" class="post">
+      <div class="post_side">
+        <img src="/static/dmitriid.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div class="post_video_outer">
+          <video
+            autoplay=""
+            muted=""
+            loop=""
+            preload="auto"
+            playsinline=""
+            onplay="toggle_video(this.parentNode, true);"
+            class="post_video"
+          >
+            <source type="video/mp4" src="/post/0Xzx_MvPr/N9rOdJF.fit.mp4" />
+          </video>
+          <div class="controls">
+            <button
+              onclick="toggle_video(this.parentNode.parentNode);"
+              class="paused"
+            ></button
+            ><button
+              onclick="toggle_video_fullscreen(this.parentNode.parentNode);"
+              class="fullscreen"
+            ></button>
+          </div>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">dmitriid: </span>Edit: After this was
+            posted, Ilya K pointed out that this is not a functionality provided
+            by Apple. It's a behaviour enabled by an extension, and it baheaves
+            as well as it can given the constraints.
+          </p>
+          <p>Original text:</p>
+          <p>
+            So, Apple finally gave users the ability to open links in
+            third-party apps. For example, if you use Apollo, and not the
+            official Reddit client, you can open Reddit links in Apollo.
+          </p>
+          <p>
+            This functionality is implemented exactly as you would expect Apple
+            of recent years to implement it: it loads the full page first (and
+            triggers Reader mode if it's on), then replaces it with a call to
+            action, then interrupts you again to see if you're absolutely sure,
+            and only then takes to the app.
+          </p>
+        </div>
+        <p class="post_meta">
+          August 19, 2022 // <a href="/post/0Xzx_MvPr">Hyperlink</a
+          ><a href="/post/0Xzx_MvPr/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div data-id="0XzEOml_X" class="post">
+      <div class="post_side">
+        <img src="/static/nikitonsky.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div style="max-width: 550px">
+          <a
+            href="/post/0XzEOml_X/N9g7RBg.orig.jpeg"
+            target="_blank"
+            style="padding-bottom: 69.45454545454545%"
+            class="post_img post_img-fix"
+            ><img src="/post/0XzEOml_X/N9g7RBg.fit.jpeg"
+          /></a>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">nikitonsky: </span>I wonder how much
+            machine learning is needed to figure out that I probably won’t be
+            making 2 hour walk to get to the event.
+          </p>
+        </div>
+        <p class="post_meta">
+          August 17, 2022 // <a href="/post/0XzEOml_X">Hyperlink</a
+          ><a href="/post/0XzEOml_X/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div data-id="0Xxc20JJE" class="post">
+      <div class="post_side">
+        <img src="/static/dmitriid.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div class="post_video_outer">
+          <video
+            autoplay=""
+            muted=""
+            loop=""
+            preload="auto"
+            playsinline=""
+            onplay="toggle_video(this.parentNode, true);"
+            class="post_video"
+          >
+            <source type="video/mp4" src="/post/0Xxc20JJE/N9Hspds.fit.mp4" />
+          </video>
+          <div class="controls">
+            <button
+              onclick="toggle_video(this.parentNode.parentNode);"
+              class="paused"
+            ></button
+            ><button
+              onclick="toggle_video_fullscreen(this.parentNode.parentNode);"
+              class="fullscreen"
+            ></button>
+          </div>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">dmitriid: </span>According to Apple's
+            description of App Library, "Your apps are automatically sorted into
+            categories... The apps that you use most frequently will
+            automatically reorder based on your usage".
+          </p>
+          <p>
+            I've been using Wayke at least once a day for the past week or so.
+            So iOS helpfully reordered it out of sight.
+          </p>
+          <p>
+            How hard it has become to order apps based on recent usage?
+            Apparently, in modern world, absolutely impossible.
+          </p>
+        </div>
+        <p class="post_meta">
+          August 12, 2022 // <a href="/post/0Xxc20JJE">Hyperlink</a
+          ><a href="/post/0Xxc20JJE/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div data-id="0XvIhpmaj" class="post">
+      <div class="post_side">
+        <img src="/static/dmitriid.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div class="post_video_outer">
+          <video
+            autoplay=""
+            muted=""
+            loop=""
+            preload="auto"
+            playsinline=""
+            onplay="toggle_video(this.parentNode, true);"
+            class="post_video"
+          >
+            <source type="video/mp4" src="/post/0XvIhpmaj/N8ifarm.fit.mp4" />
+          </video>
+          <div class="controls">
+            <button
+              onclick="toggle_video(this.parentNode.parentNode);"
+              class="paused"
+            ></button
+            ><button
+              onclick="toggle_video_fullscreen(this.parentNode.parentNode);"
+              class="fullscreen"
+            ></button>
+          </div>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">dmitriid: </span>After years of neglect
+            Apple updated their Books.app on MacOS.
+          </p>
+          <p>
+            Previously you could switch pages instantly. Now you have to wait
+            for this completely unnecessary jarring animation. No, you can't
+            turn it off.
+          </p>
+          <p>
+            To add insult to injury, they can't even calculate the number of
+            pages left during the animation, so it takes another second or more
+            *after* the animation to update the page count.
+          </p>
+        </div>
+        <p class="post_meta">
+          August 5, 2022 // <a href="/post/0XvIhpmaj">Hyperlink</a
+          ><a href="/post/0XvIhpmaj/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div data-id="0XuIRotQg" class="post">
+      <div class="post_side">
+        <img src="/static/nikitonsky.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div style="max-width: 550px">
+          <a
+            href="/post/0XuIRotQg/N8TzlHj.orig.png"
+            target="_blank"
+            style="padding-bottom: 14.76323119777159%"
+            class="post_img post_img-fix"
+            ><img src="/post/0XuIRotQg/N8TzlHj.fit.jpeg"
+          /></a>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">nikitonsky: </span>When you have enough
+            space for ellipsis but not enough for a single letter “e”
+          </p>
+          <p>Thanks Danil for the picture</p>
+        </div>
+        <p class="post_meta">
+          August 2, 2022 // <a href="/post/0XuIRotQg">Hyperlink</a
+          ><a href="/post/0XuIRotQg/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div data-id="0Xtwka_Ug" class="post">
+      <div class="post_side">
+        <img src="/static/nikitonsky.jpg" class="post_avatar" />
+      </div>
+      <div class="post_content">
+        <div class="post_video_outer">
+          <video
+            autoplay=""
+            muted=""
+            loop=""
+            preload="auto"
+            playsinline=""
+            onplay="toggle_video(this.parentNode, true);"
+            class="post_video"
+          >
+            <source type="video/mp4" src="/post/0Xtwka_Ug/N8OSAj5.fit.mp4" />
+          </video>
+          <div class="controls">
+            <button
+              onclick="toggle_video(this.parentNode.parentNode);"
+              class="paused"
+            ></button
+            ><button
+              onclick="toggle_video_fullscreen(this.parentNode.parentNode);"
+              class="fullscreen"
+            ></button>
+          </div>
+        </div>
+        <div class="post_body">
+          <p>
+            <span class="post_author">nikitonsky: </span>The in-place popup
+            might not be such a good idea if it gets in a way of using other
+            controls
+          </p>
+          <p>Thanks Vladimir Obrizan for the video</p>
+        </div>
+        <p class="post_meta">
+          August 1, 2022 // <a href="/post/0Xtwka_Ug">Hyperlink</a
+          ><a href="/post/0Xtwka_Ug/edit" class="post_meta_edit">Edit</a>
+        </p>
+      </div>
+    </div>
+    <div class="loader-block row center"><div class="loader"></div></div>
+    <footer>
+      <a href="https://twitter.com/nikitonsky">Nikita Prokopov</a>,
+      <a href="https://twitter.com/freetonik">Rakhim Davletkaliyev</a>,
+      <a href="https://grishaev.me/">Ivan Grishaev</a>,
+      <a href="https://twitter.com/dmitriid">Dmitrii Dimandt</a> and
+      contributors. 2018–2222. All fights retarded.
+    </footer>
+  </body>
+</html>

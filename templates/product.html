@@ -1,0 +1,70 @@
+{% extends "base.html" %} {% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 grid-rows-1">
+  <img
+    class="mx-auto lg:w-3/4 rounded"
+    src="/static/{{product[0].image}}"
+    alt=""
+  />
+  <div class="flex flex-col lg:mt-0 justify-between lg:w-3/4">
+    <h1 class="text-2xl font-bold">{{product[0].name}}</h1>
+    <p class="font-semibold">${{product[0].price}}</p>
+    <div class="prose prose-headings:m-0 prose-li:leading-[1rem]">
+      {{product[0].description | safe}}
+    </div>
+    <form x-data @submit.prevent="coca">
+      <h2 class="text-xl font-semibold">Size</h2>
+      <div class="my-2 h-10 lg:h-12 grid grid-cols-4 gap-x-4">
+        {% for productWithSize in product %}
+        <input
+          name="size"
+          type="radio"
+          class="hidden"
+          value="{{productWithSize.id}}"
+          id="{{productWithSize.id}}"
+        />
+        <label
+          for="{{productWithSize.id}}"
+          class="uppercase border border-2 flex items-center justify-center hover:bg-gray-200 bg-gray-100 cursor-pointer font-semibold rounded relative"
+        >
+          {{productWithSize.option}}
+        </label>
+        {%endfor%}
+      </div>
+      <label for="quantity" class="text-sm font-semibold"> qty</label>
+      <div class="grid grid-cols-4 gap-x-2 items-center">
+        <div class="col-span-1">
+          <input
+            type="number"
+            x-model="$store.cart.newItem.quantity"
+            id="quantity"
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-primary-500 focus:border-primary-500 block w-full p-2"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          class="py-2 col-span-3 text-white rounded disabled:bg-opacity-50 bg-{{product[0].accentColor}} bg-opacity-90 hover:bg-opacity-100 focus:ring-2 ring-{{product[0].accentColor}}"
+        >
+          add to cart
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style type="text/tailwindcss">
+    input[type="radio"]:checked + label {
+   @apply border-{{product[0].accentColor}}
+  }
+</style>
+
+<!-- src={item.image} alt={item.name}
+<a class="hover:underline" href="/products/{item.slug}"> {item.name}</a>
+<p class="ml-4">${item.price}</p>
+<p class="mt-1 text-sm text-gray-500 uppercase">{item.option}</p>
+bind:value={item.quantity} 
+
+ -->
+{% endblock %}
+
+<!-- quantita zero non funziona per oras -->

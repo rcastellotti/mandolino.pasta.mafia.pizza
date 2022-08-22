@@ -1,0 +1,43 @@
+{% extends "base.html" %} {% block content %}
+
+<main class="grid gap-y-10">
+  {%for product in products%}
+
+  <div class="border rounded">
+    <img src="/static/mike.png" alt="d" />
+    <div class="flex gap-x-2 p-2">
+      <div>
+        <span class="font-semibold">@fedfontana:</span>
+        <p class="text-xs text-gray-500">11/02/2019</p>
+      </div>
+      <div class="text-gray-700 flex flex-col">
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet
+          excepturi laboriosam temporibus ad quis atque! Quae, quos. Cumque
+          alias saepe ipsum rerum dolores amet ullam reprehenderit nostrum,
+          exercitationem tenetur eligendi.
+        </p>
+        <span class="self-end">🍕🍕🍕🍕🍕</span>
+        <div class="flex gap-x-2">
+          <span
+            class="bg-gray-200 rounded-full px-2 py-0.5 text-sm font-semibold text-gray-700"
+            >#photography</span
+          >
+          <span
+            class="bg-gray-200 rounded-full px-2 py-0.5 text-sm font-semibold text-gray-700"
+            >#gino</span
+          >
+          <span
+            class="bg-gray-200 rounded-full px-2 py-0.5 text-sm font-semibold text-gray-700"
+            >#blabla</span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  {%endfor%}
+</main>
+
+{% endblock %}
+
+<!-- class="rounded transition ease-in-out group-hover:opacity-75 hover:scale-105 transform-gpu" -->

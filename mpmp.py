@@ -1,54 +1,65 @@
-from flask import Flask, render_template, g
-import sqlite3
+from flask import Flask, render_template, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from dataclasses import dataclass
+import json
 
 app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///sqlite.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
+
+tags = db.Table(
+    "postcategories",
+    db.Column("post_id", db.Integer, db.ForeignKey("post.id"), primary_key=True),
+    db.Column(
+        "category_id", db.Integer, db.ForeignKey("category.id"), primary_key=True
+    ),
+)
 
 
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(80),nullable=False)
+    date = db.Column(db.String(80), nullable=False)
+    image = db.Column(db.String(120), unique=True, nullable=False)
+    slug = db.Column(db.String(120), unique=True, nullable=False)
+    categories = db.relationship("Category", backref="post", lazy=True)
+    author = db.relationship("User", backref="post", lazy=True, uselist=False)
+
+    def __repr__(self):
+        return "<Post %r>" % self.text
 
 
-DATABASE = "sqlite.db"
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+
+    def __repr__(self):
+        return "<User %r>" % self.username
 
 
-def get_db():
-    db = getattr(g, "_database", None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = dict_factory
-    return db
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(512), unique=True, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
 
-
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, "_database", None)
-    if db is not None:
-        db.close()
+    def __repr__(self):
+        return "<Category %r>" % self.text
 
 
 @app.get("/")
 def index():
-
-    cur = get_db().cursor()
-    res = cur.execute("SELECT * FROM products")
-    products = res.fetchall()
-    return render_template("index.html", products=products)
+    posts = Post.query.all()
+    return render_template("index.html", posts=posts)
 
 
 @app.get("/p/<path:path>")
 def p(path):
-    cur = get_db().cursor()
-
-    res = cur.execute(
-        """SELECT * FROM products JOIN productOptions ON productId = products.id WHERE  slug = ? """,
-        [path],
-    )
-    post = res.fetchall()
-    return render_template("product.html", post=post)
-
+    posts = Post.query.filter_by(slug=path)
+    return render_template("index.html", posts=posts)
 
 
 @app.errorhandler(404)

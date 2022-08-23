@@ -116,7 +116,7 @@ def add():
             category = Category(text=text)
             post.categories.append(category)
             post.author = current_user
-            db.session.commit()
+        db.session.commit()
 
         if "file" not in request.files:
             flash("No file part")

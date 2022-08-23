@@ -1,0 +1,33 @@
+{% extends "base.html" %} {% block content %}
+
+<form
+  method="POST"
+  action="/login"
+  class="bg-white rounded shadow flex flex-col p-4"
+>
+  <h1 class="text-xl font-bold text-center">login</h1>
+  <label for="username" class="mb-2 font-medium">username </label>
+  <input
+    type="text"
+    name="username"
+    class="bg-gray-50 border border-gray-300 rounded p-2"
+    required=""
+  />
+  <label for="password" class="mb-2 font-medium"> Password </label>
+  <input
+    type="password"
+    name="password"
+    class="bg-gray-50 border border-gray-300 rounded p-2"
+    required=""
+  />
+  <button
+    type="submit"
+    class="mt-5 text-white bg-zinc-900 hover:bg-zinc-800 font-medium rounded py-2.5 text-center"
+  >
+    login
+  </button>
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="mt-5 text-red-500 text-center">{{ messages[0] }}</div>
+  {% endif %} {% endwith %}
+</form>
+{% endblock %}

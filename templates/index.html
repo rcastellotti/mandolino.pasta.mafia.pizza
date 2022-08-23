@@ -1,33 +1,38 @@
 {% extends "base.html" %} {% block content %} {%for post in posts%}
-<a
-  class="transition ease-in-out hover:scale-105 transform-gpu group border bg-white shadow-xl rounded"
-  href="/p/{{post.slug}}"
->
-  <img
-    class="transform-gpu group-hover:opacity-75 rounded-t object-cover"
-    src="/static/test.png"
-    alt="d"
-  />
-  <div class="flex gap-x-2 p-2">
-    <div>
-      <span class="font-semibold">@{{post.author.username}}:</span>
-      <p class="text-xs text-gray-500">{{post.date}}</p>
-    </div>
-    <div class="text-gray-700 flex flex-col text-sm">
-      <p>{{post.text}}</p>
-      <!--  -->
-      <div class="mt-2 flex gap-x-2 text-xs justify-between">
+<div class="bg-white mx-auto shadow-xl rounded text-sm sm:text-base">
+  <!-- class="transition ease-in-out hover:scale-105 transform-gpu group border" -->
+  <div class="relative">
+    <img
+      class="max-h-128 z-10 transform-gpu group-hover:opacity-75 rounded-t"
+      src="{{post.image}}"
+    />
+    <div
+      class="rounded-t bg-gradient-to-b from-black w-full h-full absolute bottom-0 left-0"
+    >
+      <div class="m-2 text-xs flex justify-between">
         <div>
           {% for category in post.categories%}
-          <span
-            class="bg-zinc-200 rounded-full px-2 py-0.5 font-semibold text-gray-700 border border-zinc-500"
-            >#{{category.text}}</span
-          >
+          <span class="mr-1 font-semibold text-white">
+            #{{category.text}}
+          </span>
           {%endfor%}
         </div>
-        <span class="self-end">🍕🍕🍕🍕🍕</span>
+
+        <span class="self-end">
+          {%for i in range(post.rating)%} 🍕 {%endfor%}
+        </span>
       </div>
     </div>
   </div>
-</a>
+  <div class="flex gap-x-2 p-4 border-r border-l border-gray-400">
+    <span class="font-semibold">@{{post.author.username}}:</span>
+    <span class="text-gray-700">{{post.text}}</span>
+  </div>
+  <div
+    class="border-r border-l border-gray-400 border-b bg-gray-200 rounded-b text-center"
+  >
+    <span class="text-xs">{{post.date}}</span>
+  </div>
+</div>
+
 {%endfor%} {% endblock %}

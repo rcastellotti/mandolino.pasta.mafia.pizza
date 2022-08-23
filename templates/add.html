@@ -1,0 +1,101 @@
+{% extends "base.html" %} {% block content %}
+<script>
+  var loadFile = function (event) {
+    var output = document.getElementById("output");
+    var upload = document.getElementById("upload");
+    output.src = URL.createObjectURL(event.target.files[0]);
+    upload.style.display = "none";
+    output.onload = function () {
+      URL.revokeObjectURL(output.src); // free memory
+    };
+  };
+</script>
+
+<form enctype=multipart/form-data
+  method="POST"
+  action="/add"
+  class="bg-white rounded shadow flex flex-col p-4"
+>
+  <h1 class="text-xl font-bold text-center">add</h1>
+  <label for="email" class="mb-2 font-medium">
+    categories (spaces separated)
+  </label>
+  <input
+    type="text"
+    name="categories"
+    class="bg-gray-50 border border-gray-300 rounded p-2"
+    required=""
+  />
+  <label for="rating" class="mb-2 font-medium">
+    rating
+  </label>
+  <input
+    type="number"
+    name="rating"
+    class="bg-gray-50 border border-gray-300 rounded p-2"
+    required=""
+  />
+  <label for="text" class="mb-2 font-medium"> text </label>
+  <textarea
+    required=""
+    name="text"
+    class="bg-gray-50 border border-gray-300 rounded p-2"
+    rows="5"
+  ></textarea>
+
+  <div class="flex flex-col justify-center items-center w-full mt-5">
+    <label
+      id="upload"
+      for="dropzone-file"
+      class="flex flex-col justify-center items-center w-full h-32 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer hover:bg-gray-100"
+    >
+      <div class="flex flex-col justify-center items-center pt-5 pb-6">
+        <svg
+          aria-hidden="true"
+          class="mb-3 w-10 h-10 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+          >
+        </path>
+        </svg>
+        <p class="mb-2 text-sm text-gray-500">
+          <span class="font-semibold">Click to upload</span> or drag and drop
+        </p>
+        <p class="text-xs text-gray-500">
+          SVG, PNG, JPG or GIF (MAX. 800x400px)
+        </p>
+      </div>
+      <input
+        accept="image/*"
+        id="dropzone-file"
+        type="file"
+        name="file"
+        class="hidden"
+        onchange="loadFile(event)"
+      />
+    </label>
+    <label class="group" id="upload" for="dropzone-file">
+      <img class="rounded" id="output" />
+    </label>
+  </div>
+
+  <button
+    type="submit"
+    class="mt-5 text-white bg-zinc-900 hover:bg-zinc-800 font-medium rounded py-2.5 text-center"
+  >
+    add post
+  </button>
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="mt-5 text-red-500 text-center">{{ messages[0] }}</div>
+  {% endif %} {% endwith %}
+</form>
+
+{% endblock %}
